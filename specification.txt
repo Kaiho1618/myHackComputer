@@ -1,0 +1,73 @@
+-------------------------------------
+---VMtranslator_frontend.cppの仕様---
+-------------------------------------
+.vmファイル中のVMコマンドをアセンブリコードに変換する
+
+<<VMコマンド>>
+VMコマンドは各行に最大で1つあり、フォーマットは次のいずれか
+(a)command               
+(b)command arg
+(c)command arg1 arg2
+
+コマンド(a)の種類は以下の通り
+add |   x+y
+sub |   x-y
+neg |   -y
+eq  |   x==y:true?false
+gt  |   x>y:true?false
+lt  |   x<y:true?false
+and |   x&y
+or  |   x|y
+not |   ~y
+
+
+
+-------------------------
+---assembler.cppの仕様---
+-------------------------
+アセンブリコード(.asm)をHack機械語(.hack)に変換する
+
+<<アセンブリ言語>>
+アセンブリのコマンドは各行に最大で1つであり、コマンドは命令またはシンボル宣言のいずれか
+
+-命令-
+命令の種類は以下のいずれか
+(a) @value
+(b) dest=comp;jump
+
+(a)A命令の詳細
+    valueは非負数の10進数表記またはそのような数字を参照するシンボル。レジスタAにvalueを格納する
+(b)命令の詳細
+    destもしくはjumpのどちらかは空でもよい。空の場合、それぞれ
+        dest=comp
+        comp;jump
+    の形をとる。
+    destは以下のいずれか
+        null, M, D, MD, A, AM, AD, AMD
+    compは以下のいずれか。ただしXはA,M,Dのいずれかを、YはA,Mのいずれかを表す
+        0, 1, -1, X, !X, -X, X+1, X-1, D+Y, D-Y, Y-D, D&Y, D|Y 
+    jumpは以下のいずれか。ただしoutはALUの出力
+        JGT |If out > jump
+        JEQ |If out == jump
+        JGE |If out >= jump
+        JLT |If out < jump
+        JNE |If out != jump
+        JLE |If out <= jump
+        JMP |jump
+
+-シンボル-
+プログラムの次のコマンドが格納されるメモリ位置とシンボルを結びつける.
+すなわち、@Xxxが格納されているRAMのデータをMレジスタにロードする。
+ただし、@Xxxが初めて登場するシンボルで、かつ定義済みシンボルではない場合はRAMアドレスが新たに割り当てられる
+
+定義済みシンボルは以下の通り
+    label   |   RAMアドレス
+    SP      |   0
+    LCL     |   1
+    ARG     |   2
+    THIS    |   3
+    THAT    |   4
+    R0-R15  |   0-15
+    SCREEN  |   16384
+    KBD     |   24576
+    
